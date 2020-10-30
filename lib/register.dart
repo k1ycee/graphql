@@ -2,75 +2,47 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:graphql_interview/register.dart';
 import 'package:graphql_interview/widgets/button.dart';
 import 'package:graphql_interview/widgets/inputfield.dart';
 
-void main() {
-  runApp(MyApp());
-}
 
-class MyApp extends StatelessWidget {
+
+class Register extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    final HttpLink httplink =
-        HttpLink(uri: "https://hagglex-backend.herokuapp.com/graphql");
-
-    final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
-      GraphQLClient(
-        link: httplink,
-        cache: OptimisticCache(dataIdFromObject: typenameDataIdFromObject),
-      ),
-    );
-
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => GraphQLProvider(
-              child: Register(),
-              client: client,
-            ),
-        'login': (context) => GraphQLProvider(
-              child: Login(),
-              client: client,
-            ),
-        // 'register': (context) => Register()
-      },
-    );
-  }
+  _RegisterState createState() => _RegisterState();
 }
 
-class Login extends StatefulWidget {
-  @override
-  _LoginState createState() => _LoginState();
-}
-
-class _LoginState extends State<Login> {
+class _RegisterState extends State<Register> {
   String mutation = """
-  mutation userLogin(\$email: String!, \$password: String!){
-   login(data:{
-    email: \$email,
-    password: \$password
-  }){
-    user {
-      id,
-      email,
-      username,
-      phonenumber,
-      phoneNumberDetails {
-        phoneNumber,
-        callingCode,
-        flag
-      },
-    }
-    token
-  }
-}
-  
+  mutation registerUser(\$email: String!, \$username: String!, \$password: String!, \$phonenumber: String!, \$callingCode: String!, \$flag: String) {
+   register(data: 
+     {
+       email: \$email,
+       username: \$username,
+       password: \$password,
+       phonenumber: \$phonenumber,
+       phoneNumberDetails: {
+         phoneNumber: \$phonenumber, 
+         callingCode: \$callingCode, 
+         flag: \$flag
+       }
+     }) {
+      user {
+       id,
+       email,
+       username,
+       phonenumber,
+       phoneNumberDetails {
+         phoneNumber,
+         callingCode,
+         flag
+       },
+     }
+     token
+   }
+} 
   """;
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,9 +56,9 @@ class _LoginState extends State<Login> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(left: 8.0, right: 220.0),
+                    padding: const EdgeInsets.only(left: 8.0, right: 182.0),
                     child: Text(
-                      "Login",
+                      "Register",
                       style: GoogleFonts.poppins(
                           color: Colors.greenAccent[700], fontSize: 32),
                     ),
@@ -95,7 +67,7 @@ class _LoginState extends State<Login> {
                     height: 40,
                   ),
                   TextFields(
-                    controller: emailController,
+                    controller: null,
                     hint: "E-mail",
                     styleFontSize: 12,
                     underlineBorder: UnderlineInputBorder(
@@ -106,12 +78,40 @@ class _LoginState extends State<Login> {
                     ),
                   ),
                   SizedBox(
-                    height: 15,
+                    height: 10,
                   ),
                   TextFields(
-                    controller: passwordController,
+                    controller: null,
+                    hint: "Username",
+                    styleFontSize: 12,
+                    underlineBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.greenAccent[700]),
+                    ),
+                    errorBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.red),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  TextFields(
+                    controller: null,
                     hint: "Password",
                     obscure: true,
+                    styleFontSize: 12,
+                    underlineBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color:Colors.greenAccent[700]),
+                    ),
+                    errorBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.red),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  TextFields(
+                    controller: null,
+                    hint: "Phone Number",
                     styleFontSize: 12,
                     underlineBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.greenAccent[700]),
@@ -129,29 +129,22 @@ class _LoginState extends State<Login> {
                       AuthButton(
                         buttonColor: Colors.greenAccent[700],
                         name: Text(
-                          "Login",
+                          "Register",
                           style: GoogleFonts.poppins(
                               color: Colors.white, fontSize: 14),
                         ),
-                        tap: () {
-                          print("${emailController.text} ${passwordController.text}");
-                          runMutation({
-                            "email": emailController.text,
-                            "password": passwordController.text
-                          });
-                        },
+                        tap: () {},
                         height: MediaQuery.of(context).size.height / 20,
                         width: MediaQuery.of(context).size.width / 5,
-                      ),
+                      )
                     ],
                   ),
-                  Text(result.data == null ? "waiting...": result.data.data["login"]["user"]["username"].toString()),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 50.0, vertical: 25),
                     child: RichText(
                       text: TextSpan(
-                        text: 'Don\'t have an account? ',
+                        text: 'Already have an account! ',
                         style: TextStyle(
                             fontSize: 14,
                             color: Colors.greenAccent[700],
@@ -160,9 +153,11 @@ class _LoginState extends State<Login> {
                           TextSpan(
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                Navigator.pushNamed(context, "/");
+                                Navigator.pushNamed(
+                                  context, "login"
+                                );
                               },
-                            text: 'Register',
+                            text: 'Sign In',
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,

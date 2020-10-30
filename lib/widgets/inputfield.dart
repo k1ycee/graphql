@@ -68,7 +68,7 @@ class _TextFieldsState extends State<TextFields> {
       controller: widget.controller,
       style: GoogleFonts.poppins(
         fontSize: widget.fontSize,
-        color: Colors.greenAccent,
+        color: Colors.greenAccent[700],
       ),
       keyboardType: widget.textInputType,
       textInputAction: widget.inputAction,
@@ -86,7 +86,7 @@ class _TextFieldsState extends State<TextFields> {
         focusedBorder: widget.underlineBorder,
         contentPadding: EdgeInsets.only(bottom: 12.0),
         labelStyle: GoogleFonts.poppins(
-          color: Colors.greenAccent,
+          color: Colors.greenAccent[700],
           fontSize: widget.styleFontSize,
           fontWeight: widget.fontWeight,
         ),
