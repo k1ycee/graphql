@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:graphql_interview/register.dart';
+import 'package:graphql_interview/utils/globals.dart';
+import 'package:graphql_interview/verify_user.dart';
 import 'package:graphql_interview/widgets/button.dart';
 import 'package:graphql_interview/widgets/inputfield.dart';
 
@@ -15,14 +17,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final HttpLink httplink =
         HttpLink(uri: "https://hagglex-backend.herokuapp.com/graphql");
+    final AuthLink authlink = AuthLink(getToken: () => 'Bearer $authToken');
+    final Link link = authlink.concat(httplink);
 
     final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
-        link: httplink,
+        link: link,
         cache: OptimisticCache(dataIdFromObject: typenameDataIdFromObject),
       ),
     );
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
@@ -35,7 +38,10 @@ class MyApp extends StatelessWidget {
               child: Login(),
               client: client,
             ),
-        // 'register': (context) => Register()
+        'verifyuser': (context) => GraphQLProvider(
+              child: VerifyUser(),
+              client: client,
+            )
       },
     );
   }
@@ -127,25 +133,29 @@ class _LoginState extends State<Login> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       AuthButton(
+                        // busy: result.loading,
                         buttonColor: Colors.greenAccent[700],
                         name: Text(
                           "Login",
                           style: GoogleFonts.poppins(
                               color: Colors.white, fontSize: 14),
                         ),
-                        tap: () {
-                          print("${emailController.text} ${passwordController.text}");
+                        tap: (){
                           runMutation({
                             "email": emailController.text,
                             "password": passwordController.text
                           });
+                          authToken = result.data.data["login"]["token"].toString();
+                          Navigator.pushNamed(context, "verifyuser");
                         },
-                        height: MediaQuery.of(context).size.height / 20,
+                        height: MediaQuery.of(context).size.height / 18,
                         width: MediaQuery.of(context).size.width / 5,
                       ),
                     ],
                   ),
-                  Text(result.data == null ? "waiting...": result.data.data["login"]["user"]["username"].toString()),
+                  Text(result.data == null
+                      ? "waiting..."
+                      : result.data.data["login"]["token"].toString()),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 50.0, vertical: 25),

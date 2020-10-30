@@ -46,6 +46,7 @@ class _AuthButtonState extends State<AuthButton> {
         child: Center(
             child: widget.busy
                 ? CircularProgressIndicator(
+                  strokeWidth: 1.0,
                     valueColor: AlwaysStoppedAnimation(Colors.white),
                   )
                 : widget.name),
